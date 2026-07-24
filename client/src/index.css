@@ -205,6 +205,30 @@ textarea {
   min-width: 220px;
 }
 
+.filter-control {
+  position: relative;
+}
+
+.filter-control select {
+  padding-left: 2.5rem;
+}
+
+.filter-control__icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.85rem;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: #6b7280;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -305,6 +329,49 @@ textarea {
 .button--small {
   padding: 0.55rem 0.8rem;
   font-size: 0.9rem;
+}
+
+.table-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.action-button--edit {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-button--edit:hover {
+  background: #dbeafe;
+}
+
+.action-button--delete {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.action-button--delete:hover {
+  background: #fee2e2;
+}
+
+.employees-page .page__header {
+  border-bottom: none;
+}
+
+.employees-table thead th {
+  border-bottom: none;
 }
 
 .modal-overlay {
@@ -649,11 +716,21 @@ input[type='number'] {
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  background: currentColor;
-  color: white;
+  background: #d1d5db;
+  color: #374151;
   display: grid;
   place-items: center;
   font-size: 0.95rem;
+}
+
+.stepper__circle--active {
+  background: white;
+  color: #2563eb;
+}
+
+.stepper__circle--completed {
+  background: #10b981;
+  color: white;
 }
 
 .stepper__label {

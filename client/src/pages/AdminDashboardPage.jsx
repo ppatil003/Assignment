@@ -13,9 +13,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { useEffect, useMemo, useState } from 'react';
+import { apiRequest } from '../api';
 
 const summaryCards = [
-  { label: 'Total Employees', value: 187 },
   { label: 'Active Reviews', value: 58 },
   { label: 'Pending Approvals', value: 14 },
   { label: 'Completed Reviews', value: 129 },
@@ -98,6 +99,40 @@ const topDepartments = [
 const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ec4899', '#c2410c'];
 
 function AdminDashboardPage() {
+  const [employees, setEmployees] = useState([]);
+  const [totalEmployees, setTotalEmployees] = useState(0);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const result = await apiRequest('/employees');
+        setEmployees(result.data || []);
+        setTotalEmployees(result.total || 0);
+      } catch (error) {
+        // Keep the dashboard usable if the employee service is temporarily unavailable.
+        setEmployees([]);
+      } finally {
+        setIsLoadingEmployees(false);
+      }
+    };
+
+    loadEmployees();
+  }, []);
+
+  const employeeStatusDistribution = useMemo(
+    () => ['Active', 'On Leave', 'Inactive'].map((status) => ({
+      name: status,
+      value: employees.filter((employee) => employee.status === status).length,
+    })),
+    [employees]
+  );
+
+  const dashboardSummaryCards = [
+    { label: 'Total Employees', value: isLoadingEmployees ? '…' : totalEmployees },
+    ...summaryCards,
+  ];
+
   return (
     <section className="page">
       <div className="page__header">
@@ -108,7 +143,7 @@ function AdminDashboardPage() {
       </div>
 
       <div className="summary-grid">
-        {summaryCards.map((card) => (
+        {dashboardSummaryCards.map((card) => (
           <div key={card.label} className="summary-card">
             <span>{card.label}</span>
             <strong>{card.value}</strong>
@@ -240,6 +275,28 @@ function AdminDashboardPage() {
                 ))}
               </Pie>
               <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="dashboard-card">
+          <h2>Employee Status Distribution</h2>
+          <ResponsiveContainer width="100%" height={320}>
+            <PieChart>
+              <Pie
+                data={employeeStatusDistribution}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={65}
+                outerRadius={100}
+                paddingAngle={4}
+              >
+                {employeeStatusDistribution.map((entry, index) => (
+                  <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>
         </div>

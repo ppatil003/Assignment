@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Modal from '../components/Modal';
 import { apiRequest } from '../api';
 
+function FilterIcon() {
+  return (
+    <svg className="filter-control__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z" />
+    </svg>
+  );
+}
+
 function DepartmentsPage() {
   const [search, setSearch] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -86,7 +94,6 @@ function DepartmentsPage() {
       <div className="page__header">
         <div>
           <h1>Departments</h1>
-          <p>Track department budgets, HOD assignments, headcount, and performance metrics.</p>
         </div>
         <button className="button button--primary" onClick={openNewModal}>
           + Add Department
@@ -101,14 +108,17 @@ function DepartmentsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)}>
-          <option value="">All Departments</option>
-          {departments.map((department) => (
-            <option key={department._id} value={department.name}>
-              {department.name}
-            </option>
-          ))}
-        </select>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)}>
+            <option value="">Departments</option>
+            {departments.map((department) => (
+              <option key={department._id} value={department.name}>
+                {department.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && <div className="empty-state">{error}</div>}
@@ -134,16 +144,14 @@ function DepartmentsPage() {
                 <td>{departmentEmployees.length ? departmentEmployees.map((employee) => employee.name).join(', ') : '-'}</td>
                 <td>₹{department.budget.toLocaleString()}</td>
                 <td>
-                  <button
-                    className="icon-button"
-                    onClick={() => openEditModal(department)}
-                    aria-label="Edit department"
-                  >
-                    ✏️
-                  </button>
-                  <button className="icon-button icon-button--danger" onClick={() => handleDelete(department)} aria-label="Delete department">
-                    🗑️
-                  </button>
+                  <div className="table-actions">
+                    <button className="action-button action-button--edit" onClick={() => openEditModal(department)}>
+                      Edit
+                    </button>
+                    <button className="action-button action-button--delete" onClick={() => handleDelete(department)}>
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>;
             })}

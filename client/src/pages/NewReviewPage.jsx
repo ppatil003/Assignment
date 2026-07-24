@@ -87,11 +87,11 @@ function NewReviewPage() {
   };
 
   const handleSubmit = () => {
-    if (activeStep < steps.length - 1) {
-      handleNext();
-    } else {
-      window.alert('Review submitted successfully.');
-    }
+    window.alert('Review submitted successfully.');
+  };
+
+  const handleSaveDraft = () => {
+    window.alert('Review saved as a draft.');
   };
 
   return (
@@ -355,19 +355,16 @@ function NewReviewPage() {
                 <strong>{overallCompetencyScore.toFixed(1)}</strong>
               </div>
             </div>
-            <div className="review-actions">
-              <button className="button button--secondary" type="button">
-                Save Draft
-              </button>
-              <button className="button button--primary" type="button">
-                Submit Review
-              </button>
-            </div>
           </div>
         )}
       </div>
 
       <div className="wizard-footer">
+        {activeStep === steps.length - 1 && (
+          <button className="button button--secondary" type="button" onClick={handleSaveDraft}>
+            Save Draft
+          </button>
+        )}
         <button
           className="button button--secondary"
           type="button"
@@ -376,7 +373,7 @@ function NewReviewPage() {
         >
           Back
         </button>
-        <button className="button button--primary" type="button" onClick={handleSubmit}>
+        <button className="button button--primary" type="button" onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}>
           {activeStep === steps.length - 1 ? 'Submit Review' : 'Next'}
         </button>
       </div>

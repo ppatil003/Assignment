@@ -14,6 +14,7 @@ function DailyWorkPage() {
   });
 
   const formattedDate = selectedDate.toLocaleDateString('en-CA');
+  const isToday = formattedDate === new Date().toLocaleDateString('en-CA');
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -40,7 +41,9 @@ function DailyWorkPage() {
   const moveDate = (direction) => {
     setSelectedDate((prev) => {
       const next = new Date(prev);
+      next.setHours(0, 0, 0, 0);
       next.setDate(prev.getDate() + direction);
+      if (direction > 0 && next.toLocaleDateString('en-CA') > new Date().toLocaleDateString('en-CA')) return prev;
       return next;
     });
   };
@@ -90,7 +93,7 @@ function DailyWorkPage() {
               ◀
             </button>
             <div className="date-display">{formattedDate}</div>
-            <button className="button button--secondary" onClick={() => moveDate(1)} type="button">
+            <button className="button button--secondary" onClick={() => moveDate(1)} type="button" disabled={isToday}>
               ▶
             </button>
           </div>

@@ -5,6 +5,24 @@ import { apiRequest } from '../api';
 
 const statuses = ['Active', 'On Leave', 'Inactive'];
 
+const formatDate = (date) => {
+  if (!date) return '-';
+  const dateOnly = typeof date === 'string' ? date.slice(0, 10) : date;
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${dateOnly}T00:00:00`));
+};
+
+function FilterIcon() {
+  return (
+    <svg className="filter-control__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z" />
+    </svg>
+  );
+}
+
 function EmployeesPage() {
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
@@ -133,12 +151,21 @@ function EmployeesPage() {
     document.body.removeChild(link);
   };
 
+  const handleDelete = async (employee) => {
+    if (!window.confirm(`Delete ${employee.name}?`)) return;
+    try {
+      await apiRequest(`/employees/${employee._id}`, { method: 'DELETE' });
+      setEmployees((current) => current.filter((item) => item._id !== employee._id));
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
+
   return (
-    <section className="page">
+    <section className="page employees-page">
       <div className="page__header">
         <div>
           <h1>Employees</h1>
-          <p>Manage employee records, search, filter and export employee data.</p>
         </div>
         <button className="button button--primary" onClick={openNewModal}>
           + Add Employee
@@ -149,35 +176,44 @@ function EmployeesPage() {
         <input
           className="input input--search"
           type="text"
-          placeholder="Search employees..."
+          placeholder="Search by name or ID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
-          <option value="">All Departments</option>
-          {availableDepartments.map((department) => (
-            <option key={department._id} value={department._id}>
-              {department.name}
-            </option>
-          ))}
-        </select>
-        <select value={designationFilter} onChange={(e) => setDesignationFilter(e.target.value)}>
-          <option value="">All Designations</option>
-          {availableDesignations.map((designation) => (
-            <option key={designation} value={designation}>
-              {designation}
-            </option>
-          ))}
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">All Statuses</option>
-          {statuses.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-        <button className="button" onClick={handleExport}>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+            <option value="">Departments</option>
+            {availableDepartments.map((department) => (
+              <option key={department._id} value={department._id}>
+                {department.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={designationFilter} onChange={(e) => setDesignationFilter(e.target.value)}>
+            <option value="">Designations</option>
+            {availableDesignations.map((designation) => (
+              <option key={designation} value={designation}>
+                {designation}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="">Statuses</option>
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button className="button button--primary" onClick={handleExport}>
           Export
         </button>
       </div>
@@ -189,7 +225,7 @@ function EmployeesPage() {
         ) : noResults ? (
           <div className="empty-state">No employees match the current filters.</div>
         ) : (
-          <table className="table">
+          <table className="table employees-table">
             <thead>
               <tr>
                 <th>Employee ID</th>
@@ -215,13 +251,18 @@ function EmployeesPage() {
                   <td>
                     <StatusBadge status={employee.status} />
                   </td>
-                  <td>{employee.joiningDate}</td>
+                  <td>{formatDate(employee.joiningDate)}</td>
                   <td>{employee.contactNumber}</td>
                   <td>{employee.rating}</td>
                   <td>
-                    <button className="button button--small" onClick={() => openEditModal(employee)}>
-                      Edit
-                    </button>
+                    <div className="table-actions">
+                      <button className="action-button action-button--edit" onClick={() => openEditModal(employee)}>
+                        Edit
+                      </button>
+                      <button className="action-button action-button--delete" onClick={() => handleDelete(employee)}>
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

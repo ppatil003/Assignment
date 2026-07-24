@@ -5,6 +5,14 @@ import { apiRequest } from '../api';
 
 const reviewStatuses = ['All', 'Draft', 'Submitted', 'Under Review', 'Rework Requested', 'Approved', 'Completed'];
 
+function FilterIcon() {
+  return (
+    <svg className="filter-control__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z" />
+    </svg>
+  );
+}
+
 function ReviewsPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('All');
@@ -37,6 +45,17 @@ function ReviewsPage() {
     });
   }, [reviews, activeTab, search, departmentFilter, statusFilter]);
 
+  const handleTabChange = (status) => {
+    setActiveTab(status);
+    setStatusFilter(status === 'All' ? '' : status);
+  };
+
+  const handleStatusFilterChange = (event) => {
+    const status = event.target.value;
+    setStatusFilter(status);
+    setActiveTab(status || 'All');
+  };
+
   return (
     <section className="page">
       <div className="page__header">
@@ -54,7 +73,7 @@ function ReviewsPage() {
           <button
             key={status}
             className={`tab${activeTab === status ? ' tab--active' : ''}`}
-            onClick={() => setActiveTab(status)}
+            onClick={() => handleTabChange(status)}
           >
             {status}
           </button>
@@ -69,20 +88,26 @@ function ReviewsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
-          <option value="">All Departments</option>
-          {[...new Set(reviews.map((review) => review.department?.name).filter(Boolean))].map((department) => (
-            <option key={department} value={department}>{department}</option>
-          ))}
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">All Statuses</option>
-          {reviewStatuses.filter((status) => status !== 'All').map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+            <option value="">Departments</option>
+            {[...new Set(reviews.map((review) => review.department?.name).filter(Boolean))].map((department) => (
+              <option key={department} value={department}>{department}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-control">
+          <FilterIcon />
+          <select value={statusFilter} onChange={handleStatusFilterChange}>
+            <option value="">Statuses</option>
+            {reviewStatuses.filter((status) => status !== 'All').map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="table-wrapper">
@@ -97,7 +122,6 @@ function ReviewsPage() {
               <tr>
                 <th>Review ID</th>
                 <th>Employee</th>
-                <th>Reviewer</th>
                 <th>Department</th>
                 <th>Cycle</th>
                 <th>Status</th>
@@ -110,7 +134,6 @@ function ReviewsPage() {
                 <tr key={review._id}>
                   <td>{review.reviewId}</td>
                   <td>{review.employee?.name || '-'}</td>
-                  <td>{review.employee?.manager?.name || '-'}</td>
                   <td>{review.department?.name || '-'}</td>
                   <td>{review.cycle}</td>
                   <td><StatusBadge status={review.status} /></td>
